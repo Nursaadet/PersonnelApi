@@ -5,7 +5,6 @@
 const { mongoose } = require("../configs/dbConnection");
 /* ------------------------------------------------------- */
 const passwordEncrypt = require("../helpers/passwordEncrypt");
-// const uniqueValidator = require("mongoose-unique-validator");
 
 const PersonnelSchema = new mongoose.Schema(
   {
@@ -13,6 +12,7 @@ const PersonnelSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Department",
       required: true,
+ 
     },
 
     username: {
@@ -45,6 +45,8 @@ const PersonnelSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
+      // minlength: 10,
+      // match: /^[0-9]+$/
     },
 
     email: {
@@ -52,10 +54,7 @@ const PersonnelSchema = new mongoose.Schema(
       trim: true,
       required: true,
       unique: true,
-      validate: [
-        (email) => email.includes("@") && email.includes("."),
-        "Email is not valid",
-      ],
+      validate: [(email) => email.includes("@") && email.includes("."),"Email is not valid"],
     },
 
     title: {
@@ -95,27 +94,19 @@ const PersonnelSchema = new mongoose.Schema(
       default: Date.now(),
     },
   },
-  { collection: "personnels", timestamps: true },
+  { collection: "personnels", timestamps: true,toJSON: { virtuals: true }
+}
 );
 
-// PersonnelSchema.set("toJSON", {
-//   transform: (doc, ret) => {
-//     ret.id = ret._id;
-//     delete ret._id;
-//     delete ret.__v;
-//     delete ret.password;
-//     ret.createdAt = ret?.createdAt.toLocaleDateString("tr-tr");
-//   },
-// });
+function capitalize(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
 
-// function capitalize(str) {
-//   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-// }
+PersonnelSchema.virtual("fullname").get(function () {
+  // return `${this.firstName} ${this.lastName}`;
+  return `${capitalize(this.firstName)} ${capitalize(this.lastName)}`;
+});
 
-// PersonnelSchema.virtual("fullname").get(function () {
-//   return `${this.firstname} ${this.lastname}`;
-//   // return `${capitalize(this.firstname)} ${capitalize(this.lastname)}`;
-// });
 
+/* ------------------------------------------------------- */
 module.exports = mongoose.model("Personnel", PersonnelSchema);
-

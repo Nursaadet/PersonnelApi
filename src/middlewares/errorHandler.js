@@ -5,11 +5,12 @@
 // app.use(errorHandler):
 
 module.exports = (err, req, res, next) => {
-
-    return res.status(res?.errorStatusCode || 500).send({
+    const statusCode = err.statusCode || res.statusCode || 500;
+    return res.status(statusCode).send({
         error: true,
         message: err.message,
         cause: err.cause,
-        body: req.body
+        body: req.body,
+        type:err.name
     });
 }

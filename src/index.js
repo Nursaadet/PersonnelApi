@@ -7,9 +7,10 @@
     $ npm i cookie-session
     $ npm i jsonwebtoken
 */
+const dbConnection = require("./src/config/dbConnection");
 
 const express = require("express");
-const { dbConnection, mongoose } = require("./src/configs/dbConnection");
+const serverless = require("serverless-http");
 const app = express();
 
 /* ------------------------------------------------------- */
@@ -24,7 +25,16 @@ require("express-async-errors");
 
 /* ------------------------------------------------------- */
 //db connection
-dbConnection();
+let isConnected = false;
+
+const connectDB = async () => {
+  if (!isConnected) {
+    await dbConnection();
+    isConnected = true;
+  }
+};
+
+connectDB();
 
 //body parser
 app.use(express.json());
@@ -139,7 +149,7 @@ app.all("*", async (req, res) => {
 app.use(require("./src/middlewares/errorHandler"));
 
 // RUN SERVER:
-app.listen(PORT, () => console.log("http://127.0.0.1:" + PORT));
+// app.listen(PORT, () => console.log("http://127.0.0.1:" + PORT));
 
 /* ------------------------------------------------------- */
 // Syncronization (must be in commentLine):
@@ -152,3 +162,4 @@ app.listen(PORT, () => console.log("http://127.0.0.1:" + PORT));
 //     .catch((err) => console.error("Data could not synched"));
 // }
 
+module.exports.handler = serverless(app);
